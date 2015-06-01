@@ -1,8 +1,9 @@
-#load("/helixdata/pc_tcga.Rda")
+load("tcga_pc_x_topten.Rda")
 fumeric<-function(x) { as.factor(x)}
-t<-table(rownames(pc_tcga$x))
+t<-table(rownames(tcga_pc_x_topten))
 t<-names(head(sort(t,dec=TRUE),10))
 cancers<-t
+colorsgroup=fumeric(cancers)
 # x_cancers<-pc_tcga$x[,1][rownames(pc_tcga$x) %in% cancers]
 # y_cancers<-pc_tcga$x[,2][rownames(pc_tcga$x) %in% cancers]
 # plot(x_cancers,y_cancers,col=fumeric(names(x_cancers)),pch=19, xlab="PC1", ylab="PC2",main="Principal component analysis of TCGA Data")
@@ -14,11 +15,11 @@ server <- function(input, output) {
     if (!(length(selectedLines) ==0))
     {
       #PCA, but will have to play with it a little, not very good right now
-      plotpointsx<-pc_tcga$x[,1][rownames(pc_tcga$x) %in% selectedLines]
-      plotpointsy<-pc_tcga$x[,2][rownames(pc_tcga$x) %in% selectedLines]
-      colorsgroup=fumeric(names(plotpointsx))
-      plot(plotpointsx, plotpointsy,main = "PCA", xlab = "PC1", ylab = "PC2", pch=16,col=colorsgroup)
-      legend("topright",selectedLines,col=fumeric(selectedLines),pch=16)
+      plotpointsx<-tcga_pc_x_topten[,1][rownames(tcga_pc_x_topten) %in% selectedLines]
+      plotpointsy<-tcga_pc_x_topten[,2][rownames(tcga_pc_x_topten) %in% selectedLines]
+      colors<-factor(names(plotpointsx),colorsgroup)
+      plot(plotpointsx, plotpointsy,main = "PCA", xlab = "PC1", ylab = "PC2", pch=16,col=colors)
+      legend("topright",selectedLines,col=factor(selectedLines,colorsgroup),pch=16)
     }
   })
   
@@ -31,7 +32,7 @@ ui <- shinyUI(  fluidPage(
   column(4, wellPanel(
     checkboxGroupInput("checkGroup", label = h3("Tissue types"), 
                        choices = cancers,
-                       selected = cancers[1]),
+                       selected = c(cancers[1],cancers[2])),
    
     strong("Background"),
     br(),
